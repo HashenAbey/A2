@@ -4,41 +4,49 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Australian Weather Data Visualization</title>
-
+  
   <!-- Import Vega and Vega-Lite libraries -->
   <script src="https://cdn.jsdelivr.net/npm/vega@5.30.0"></script>
   <script src="https://cdn.jsdelivr.net/npm/vega-lite@5.20.1"></script>
   <script src="https://cdn.jsdelivr.net/npm/vega-embed@6.26.0"></script>
 
-  <!-- Styling -->
+  <!-- Style for the webpage layout and design -->
   <style>
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
       margin: 0;
       padding: 0;
-      background-color: #e0f7ff;
+      background-color: #e0f7ff; /* Light blue ocean background */
       color: #1d1d1f;
     }
 
     header {
       text-align: center;
       padding: 50px 20px;
-      background-color: #006DAE;
+      background-color: #006DAE; /* Monash Blue */
       color: white;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     }
 
     header h1 {
       font-size: 3rem;
       font-weight: 700;
+      margin: 0;
+    }
+
+    header p {
+      font-size: 1.2rem;
+      color: white;
+      margin: 10px 0 0;
     }
 
     .flex-container {
       display: flex;
       justify-content: space-between;
-      align-items: stretch;
-      max-width: 1300px; /* Increased max-width for wider containers */
+      max-width: 1200px;
       margin: 40px auto;
-      gap: 20px;
+      gap: 40px;
+      align-items: center;
     }
 
     .left-container, .right-container {
@@ -47,51 +55,43 @@
       border-radius: 15px;
       padding: 30px;
       box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      transition: all 0.3s ease;
+      transition: transform 0.3s ease;
     }
 
-    .left-container:hover, .right-container:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 15px 25px rgba(0, 0, 0, 0.15);
+    /* Hover effect for containers */
+    .left-container:hover, .right-container:hover, .bottom-container:hover {
+      transform: translateY(-5px); /* Adds lift effect */
+      box-shadow: 0 15px 25px rgba(0, 0, 0, 0.15); /* Adds stronger shadow */
     }
 
     .chart-container {
-      width: 100%;
-      height: auto; /* Adjust the height to auto for better fitting */
-      padding: 0; /* Remove padding to avoid extra space */
       display: flex;
-      justify-content: center; /* Center the chart */
-      align-items: center; /* Center the chart vertically */
-      box-sizing: border-box;
-}
-
-
-    h2 {
-      font-size: 2rem;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      text-align: center;
       margin-bottom: 20px;
     }
 
-    p {
-      margin: 0;
+    /* Center the filter control in the bar chart container */
+    .filter-container {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+
+    #map-vis, #bar-vis {
+      width: 100%;
+      height: 500px;
     }
 
     footer {
       text-align: center;
       padding: 20px;
-      background-color: #006DAE;
+      background-color: #006DAE; /* Monash Blue */
       color: white;
-      margin-top: 40px;
+      font-size: 1rem;
     }
-
-    @media (max-width: 768px) {
-      .flex-container {
-        flex-direction: column;
-      }
-    }
-
   </style>
 </head>
 <body>
@@ -99,262 +99,165 @@
   <!-- Page header -->
   <header>
     <h1>Australian Weather Data Across Key Cities</h1>
-    <p>Interactive visualizations exploring rainfall, temperature, and climate patterns across Australia.</p>
+    <p>Exploring temperature variations across Australia</p>
   </header>
 
-  <!-- Map Visualization (First) -->
-  <div class="flex-container">
-    <div class="left-container">
-      <h2>Weather Data Map</h2>
-      <p>This map shows weather data across Australia, with circle size indicating maximum temperatures and color indicating temperature differences. Hover over a location to see detailed information.</p>
-    </div>
-    <div class="right-container">
-      <div id="map-chart" class="chart-container"></div>
-    </div>
-  </div>
+  <!-- Main content area with two containers -->
+  <main>
+    <div class="flex-container">
+      <!-- Left container with text information about the map visualization -->
+      <div class="left-container">
+        <h2>About the Map Visualization</h2>
+        <p>
+          The map visualizes weather data across various locations in Australia. Each location is represented by a circle, 
+          with the circle's size indicating the maximum temperature recorded (in °C) and the color intensity showing the 
+          temperature difference (in °C). This visualization provides insights into the temperature variations across 
+          both urban and rural areas of Australia.
+        </p>
+        <p>
+          You can hover over each circle to view details about the specific location, including the maximum temperature and 
+          the difference between the highest and lowest temperatures recorded.
+        </p>
+      </div>
 
-  <!-- Bar Chart Visualization -->
-  <div class="flex-container">
-    <div class="left-container">
-      <h2>Total Rainfall by Month and Location</h2>
-      <p>This bar chart allows you to explore the total rainfall by month across various Australian locations. Use the filter to select different locations.</p>
+      <!-- Right container with the map Vega-Lite visualization -->
+      <div class="right-container">
+        <div id="map-vis"></div>
+      </div>
     </div>
-    <div class="right-container">
-      <div id="bar-chart" class="chart-container"></div>
-    </div>
-  </div>
 
-  <!-- Scatter Plot Visualization -->
-  <div class="flex-container">
-    <div class="left-container">
-      <h2>Max Temperature vs Rainfall Scatter Plot</h2>
-      <p>The scatter plot below represents the relationship between maximum temperature and rainfall. You can adjust the filter to focus on certain temperature ranges.</p>
-    </div>
-    <div class="right-container">
-      <div id="scatter-plot" class="chart-container"></div>
-    </div>
-  </div>
+    <!-- Bar chart and its description below -->
+    <div class="flex-container">
+      <!-- Left container explaining the bar chart -->
+      <div class="left-container">
+        <h2>About the Bar Chart</h2>
+        <p>
+          This bar chart compares the average maximum temperatures across different Australian locations. 
+          Use the filter slider below to view locations with a specified minimum average temperature. 
+          Each bar represents a location, and the height of the bar shows the average maximum temperature 
+          recorded at that location.
+        </p>
+      </div>
 
-  <!-- Heatmap Visualization (Last with Explanation on Left) -->
-  <div class="flex-container">
-    <div class="left-container">
-      <h2>Heatmap of Rainfall</h2>
-      <p>The heatmap below visualizes total rainfall by month and location. The color intensity represents the rainfall amount, with white borders separating each block for clarity.</p>
+      <!-- Right container with the bar chart visualization -->
+      <div class="right-container">
+        <div class="chart-container">
+          <div id="bar-vis"></div>
+        </div>
+      </div>
     </div>
-    <div class="right-container">
-      <div id="heatmap" class="chart-container"></div>
-    </div>
-  </div>
+  </main>
 
   <!-- Page footer -->
   <footer>
-    &copy; 2024 Australian Weather Data Visualization by Hashen Abeygunawardana.
+    &copy; 2024 Australian Weather Data Visualization.
   </footer>
 
-  <!-- Vega-Lite specifications for the visualizations -->
+  <!-- Vega-Lite specification for the map visualization -->
   <script>
-    // Map Visualization
     const mapSpec = {
       "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
-      "width": 900, /* Increased width for better fit */
-      "height": 560, /* Increased height for better fit */
-      "background": "#cce5ff", /* Light ocean blue */
-      "projection": {
-        "type": "mercator",
-        "center": [133.7751, -25.2744],
-        "scale": 700
-      },
+      "description": "Map visualizing weather data in Australia.",
+      "width": 500,
+      "height": 500,
       "layer": [
         {
-          "mark": {"type": "geoshape", "stroke": "white", "strokeWidth": 0.5},
-          "data": {"graticule": true}
+          "data": {
+            "url": "https://raw.githubusercontent.com/tonywr71/GeoJson-Data/refs/heads/master/australian-states.json",
+            "format": {"type": "json"}
+          },
+          "mark": {"type": "geoshape", "fill": "lightgray", "stroke": "white"},
+          "projection": {"type": "mercator"}
         },
         {
           "data": {
-            "url": "https://raw.githubusercontent.com/tonywr71/GeoJson-Data/master/australian-states.json",
-            "format": {"type": "json"}
+            "url": "https://raw.githubusercontent.com/HashenAbey/Week-10-Homework/refs/heads/main/Cleaned_Weather_Data.csv",
+            "format": {"type": "csv"}
           },
-          "mark": {
-            "type": "geoshape",
-            "fill": "#fffff0",
-            "stroke": "black",
-            "strokeWidth": 1
-          }
-        },
-        {
-          "mark": {"type": "circle", "tooltip": true},
+          "mark": "circle",
           "encoding": {
             "longitude": {"field": "Longitude", "type": "quantitative"},
             "latitude": {"field": "Latitude", "type": "quantitative"},
             "size": {
-              "field": "Rainfall",
-              "type": "quantitative",
-              "scale": {"domain": [0, 50], "range": [10, 100]}
-            },
-            "color": {
               "field": "MaxTemp",
               "type": "quantitative",
-              "scale": {"scheme": "blues"} /* Dark blue color scheme */
+              "scale": {"range": [100, 1000]},
+              "title": "Max Temperature (°C)"
+            },
+            "color": {
+              "field": "TempDifference",
+              "type": "quantitative",
+              "scale": {"scheme": "reds"},
+              "title": "Temperature Difference (°C)"
             },
             "tooltip": [
-              {"field": "Location", "type": "nominal"},
-              {"field": "Date", "type": "temporal"},
-              {
-                "field": "MaxTemp",
-                "type": "quantitative",
-                "title": "Max Temperature"
-              },
-              {"field": "Rainfall", "type": "quantitative"}
+              {"field": "Location", "type": "nominal", "title": "Location"},
+              {"field": "MaxTemp", "type": "quantitative", "title": "Max Temperature (°C)"},
+              {"field": "TempDifference", "type": "quantitative", "title": "Temperature Difference (°C)"}
             ]
-          },
-          "data": {
-            "url": "https://raw.githubusercontent.com/HashenAbey/A2/refs/heads/main/Cleaned_Weather_Data_from_2015.csv",
-            "format": {"type": "csv"}
           }
         }
       ]
     };
-    vegaEmbed("#map-chart", mapSpec, {mode: "vega-lite"});
 
-    // Bar Chart with Tooltip
-    const barChartSpec = {
+    const barSpec = {
       "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
-      "description": "Bar chart of total rainfall by month with a filter for location.",
-      "width": 600, // Adjusted width
-      "height": 300, // Adjusted height
+      "description": "Bar chart with a dynamic filter for average maximum temperature.",
+      "width": 500,
+      "height": 300,
       "data": {
-        "url": "https://raw.githubusercontent.com/HashenAbey/A2/refs/heads/main/Rainfall_by_Month_and_Location.csv",
-        "format": {"type": "csv"}
-      },
-      "transform": [{"filter": "datum.Location === locationFilter"}],
-      "params": [
-        {
-          "name": "locationFilter",
-          "value": "Melbourne",
-          "bind": {
-            "input": "select",
-            "options": [
-              "Adelaide", "Albany", "Albury", "Ballarat", "Bendigo", "Brisbane", 
-              "Cairns", "Canberra", "Cobar", "Dartmoor", "Darwin", "Hobart", 
-              "Katherine", "Launceston", "Melbourne", "Mildura", "Moree", "Newcastle",
-              "Nhil", "Nuriootpa", "Penrith", "Perth", "Portland", "Richmond", "Sale",
-              "Sydney", "Townsville", "Tuggeranong", "Uluru", "Walpole", "Watsonia", 
-              "Williamtown", "Witchcliffe", "Wollongong", "Woomera"
-            ],
-            "name": "Select Location: "
-          }
-        }
-      ],
-      "mark": {"type": "bar", "tooltip": true},
-      "encoding": {
-        "x": {
-          "field": "YearMonth",
-          "type": "ordinal",
-          "title": "Month",
-          "axis": {"labelAngle": -45}
-        },
-        "y": {
-          "field": "Rainfall",
-          "type": "quantitative",
-          "title": "Total Rainfall (mm)"
-        },
-        "tooltip": [
-          {"field": "YearMonth", "type": "ordinal", "title": "Month"},
-          {"field": "Rainfall", "type": "quantitative", "title": "Total Rainfall (mm)"}
-        ]
-      }
-    };
-    vegaEmbed("#bar-chart", barChartSpec, {mode: "vega-lite"});
-
-    // Scatter Plot
-    const scatterPlotSpec = {
-      "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
-      "description": "Scatter plot with a slider filter for Max Temperature and a color legend.",
-      "width": 600,
-      "height": 400,
-      "data": {
-        "url": "https://raw.githubusercontent.com/HashenAbey/A2/refs/heads/main/Cleaned_Weather_Data_from_2015.csv",
+        "url": "https://raw.githubusercontent.com/HashenAbey/Week-10-Homework/refs/heads/main/Cleaned_Weather_Data.csv",
         "format": {"type": "csv"}
       },
       "params": [
         {
-          "name": "MaxTempFilter",
+          "name": "maxTempFilter",
           "value": 20,
           "bind": {
             "input": "range",
-            "min": -4.8,
-            "max": 47.3,
-            "step": 0.1,
-            "name": "Filter Max Temperature (°C): "
+            "min": 20,
+            "max": 40,
+            "step": 1,
+            "name": "Filter by Max Temperature: "
           }
         }
       ],
-      "transform": [{"filter": "datum.MaxTemp >= MaxTempFilter"}],
-      "mark": "circle",
+      "transform": [
+        {
+          "filter": "datum.MaxTemp >= maxTempFilter"
+        }
+      ],
+      "mark": "bar",
       "encoding": {
         "x": {
-          "field": "MaxTemp",
-          "type": "quantitative",
-          "axis": {"title": "Max Temperature (°C)"}
-        },
-        "y": {
-          "field": "Rainfall",
-          "type": "quantitative",
-          "axis": {"title": "Rainfall (mm)"}
-        },
-        "color": {
-          "field": "MaxTemp",
-          "type": "quantitative",
-          "scale": {"scheme": "blues"},
-          "legend": {"title": "Max Temp (°C)"}
-        },
-        "tooltip": [
-          {
-            "field": "MaxTemp",
-            "type": "quantitative",
-            "title": "Max Temperature (°C)"
-          },
-          {"field": "Rainfall", "type": "quantitative", "title": "Rainfall (mm)"}
-        ]
-      }
-    };
-    vegaEmbed("#scatter-plot", scatterPlotSpec, {mode: "vega-lite"});
-
-    // Heatmap
-    const heatmapSpec = {
-      "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
-      "description": "Heatmap of total rainfall by month and location with white borders.",
-      "width": 700, /* Increased width for better fit */
-      "height": 525, /* Increased height for better fit */
-      "data": {
-        "url": "https://raw.githubusercontent.com/HashenAbey/A2/refs/heads/main/Rainfall_by_Month_and_Location.csv",
-        "format": {"type": "csv"}
-      },
-      "transform": [{"filter": "isValid(datum.Rainfall) && datum.Rainfall > 0"}],
-      "mark": {"type": "rect", "stroke": "white", "strokeWidth": 1},
-      "encoding": {
-        "x": {
-          "field": "YearMonth",
-          "type": "ordinal",
-          "title": "Month",
+          "field": "Location",
+          "type": "nominal",
+          "title": "Location",
           "axis": {"labelAngle": -45}
         },
-        "y": {"field": "Location", "type": "nominal", "title": "Location"},
-        "color": {
-          "field": "Rainfall",
+        "y": {
+          "field": "MaxTemp",
           "type": "quantitative",
-          "title": "Total Rainfall (mm)",
-          "scale": {"scheme": "blues"}
+          "aggregate": "mean",
+          "title": "Average Max Temperature (°C)"
+        },
+        "color": {
+          "field": "Location",
+          "type": "nominal",
+          "legend": null
         },
         "tooltip": [
           {"field": "Location", "type": "nominal", "title": "Location"},
-          {"field": "YearMonth", "type": "ordinal", "title": "Month"},
-          {"field": "Rainfall", "type": "quantitative", "title": "Rainfall (mm)"}
+          {"field": "MaxTemp", "type": "quantitative", "aggregate": "mean", "title": "Average Max Temp (°C)"}
         ]
       }
     };
-    vegaEmbed("#heatmap", heatmapSpec, {mode: "vega-lite"});
+
+    // Embed the Vega-Lite visualizations in the page
+    vegaEmbed("#map-vis", mapSpec, {mode: "vega-lite"}).then(console.log).catch(console.warn);
+    vegaEmbed("#bar-vis", barSpec, {mode: "vega-lite"}).then(console.log).catch(console.warn);
   </script>
 
 </body>
 </html>
+
